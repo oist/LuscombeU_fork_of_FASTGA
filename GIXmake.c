@@ -1,3 +1,4 @@
+/*  Last edited: Feb 21 16:55 2025 (rd109) */
 /*******************************************************************************************
  *
  *  Produce a k-mer index of genome's contigs suitable for finding adaptamer seed matches.
@@ -40,7 +41,7 @@
 #undef  SPACER         //  Single spaced-seed?
 
 static char *Usage[] =
-    { "[-v] [-T<int(8)>] [-P<dir(/tmp)>] [-k<int(40)] [-f<int(10)>]",
+    { "[-v] [-T<int(8)>] [-P<dir($TMPDIR)>] [-k<int(40)] [-f<int(10)>]",
       "( <source:path>[.1gdb]  |  <source:path>[<fa_extn>|<1_extn>] [<target:path>[.gix]] )"
     };
 
@@ -1548,7 +1549,9 @@ int main(int argc, char *argv[])
     FREQ = 10;
     KMER = 40;
     NTHREADS = 8;
-    SORT_PATH = "/tmp";
+    SORT_PATH = getenv("TMPDIR");
+    if (SORT_PATH == NULL)
+      SORT_PATH = ".";
 
     j = 1;
     for (i = 1; i < argc; i++)
@@ -1697,7 +1700,7 @@ int main(int argc, char *argv[])
     close(tid);
     unlink(".xxx");
 
-    nfiles = (2*NTHREADS+2)*NTHREADS + 1 + tid;
+    nfiles = (2*NTHREADS+2)*NTHREADS + 1 + tid + 100 ; // RD 250221 add 100 to allow for a few wrapping processes
     getrlimit(RLIMIT_NOFILE,&rlp);
     if (nfiles > rlp.rlim_max)
       { fprintf(stderr,"\n%s: Cannot open %lld files simultaneously\n",Prog_Name,nfiles);

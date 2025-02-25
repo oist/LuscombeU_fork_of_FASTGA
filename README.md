@@ -27,7 +27,7 @@
   - [ALNchain](#ALNchain): Alignment filtering by construction of local chains
   - [ALNreset](#ALNreset): Reset a .1aln file's internal references to the GDB(s) it was computed from
   - [PAFtoALN](#PAFtoALN): Convert a PAF formatted file with X-CIGAR strings to a .1aln file
-  - [PAFtoPSL](#PAFtoPSL): Convert a PAF formatted file with CIGAR strings to a .psl file
+  - [PAFtoPSL](#PAFtoPSL): Convert a PAF formatted file with X-CIGAR strings to a .psl file
 
 ## Overview
 
@@ -99,7 +99,7 @@ error a running discourse of the command's progress.
 ## FastGA Reference
 
 ```
-FastGA [-vk] [-T<int(8)>] [-P<dir(/tmp)] [<format(-paf)>]
+FastGA [-vk] [-T<int(8)>] [-P<dir($TMPDIR)] [<format(-paf)>]
           [-f<int(10)>] [-c<int(85)>] [-s<int(1000)>] [-l<int(100)>] [-i<float(.7)>]
           <source1:path>[<precursor] [<source2:path>[<precursor>]]
           
@@ -112,7 +112,8 @@ FastGA [-vk] [-T<int(8)>] [-P<dir(/tmp)] [<format(-paf)>]
 ```
 
 Performing a FastGA comparison can be as simple as issuing the command ```FastGA A B``` where A and B are FASTA, gzip'd FASTA, or ONEcode sequence files.  By default 8 threads will be used but this can be changed with the -T
-parameter.  By default the myriad temporary files produced by FastGA are located in /tmp but this directory
+parameter.  By default the myriad temporary files produced by FastGA are located in the directory given
+by the environment varialble ```TMPDIR``` (or ```.``` if it is undefined) but this directory
 can be changed with the -P option.  All the alignments found by FastGA are streamed to the standard output
 and by default will be in PAF format.  You can change this to PSL, or ONEcode ALN formatted output with
 the -psl and -1, options, respectively.
@@ -169,7 +170,7 @@ thresholds for chaining and alignment just described.
 <a name="FAtoGDB"></a>
 
 ```
-1. FAtoGDB [-v] <source:path>(.1seq|[<fa_extn>|<1_extn>]) [<target:path>[.1gdb]]
+1. FAtoGDB [-v] [-n<int>] <source:path>(.1seq|[<fa_extn>|<1_extn>]) [<target:path>[.1gdb]]
 
        <fa_extn> = (.fa|.fna|.fasta)[.gz]
        <1_extn>  = any valid 1-code sequence file type
@@ -194,11 +195,13 @@ The GDB actually consists of two files.  The first, *visible* file, is a ONEcode
 are kept in a separate hidden file in 2-bit compressed format.  If the visible file has name say,
 ```foo.1gdb``` then this hidden file has name ```.foo.bps```.  We split the GDB this way as many application do not actually need the sequence, but simply need the sizes of contigs, gaps, & scaffolds and their names which are kept in the "light-weight" .1gdb portion.
 
+For assemblies in FASTA files that contain n's as an undetermined base
+
 
 <a name="GIXmake"></a>
 
 ```
-2. GIXmake [-v] [-T<int(8)>] [-P<dir(/tmp)>] [-k<int(40)>] [-f<int(10)>]
+2. GIXmake [-v] [-T<int(8)>] [-P<dir($TMPDIR>] [-k<int(40)>] [-f<int(10)>]
             ( <source:path>[.1gdb]  |  <source:path>[<fa_extn>|<1_extn>] [<target:path>[.gix]] )
             
        <fa_extn> = (.fa|.fna|.fasta)[.gz]
@@ -214,7 +217,8 @@ a target if the source is a GDB, you can only do so if one is starting from a FA
 both the GDB and GIX are created as per the target directive (if present).
 
 The -T option can be used to specify the number of threads to use, where the default is 8.
-The -P option similarly allows one to override the default /tmp, as the directory where the
+The -P option similarly allows one to override the default directory given by the environmnt variable
+```TMPDIR``` (or ```.``` if it is undefined), as the directory where the
 (quite large and numerous) temporary files produced by GIXmake are held during its execution.
 When running on an
 HPC cluster node it is very important that this directory be on the disk local to the node
@@ -625,8 +629,6 @@ built.
        <fa_extn> = (.fa|.fna|.fasta)[.gz]
        <1_extn>  = any valid 1-code sequence file type
 ```
-
-*Currently Broken*
 
 PAFtoALN takes a PAF file as its first argument and the two sources that were compared to produce the
 alignment in the PAF file as the second and third arguments.
