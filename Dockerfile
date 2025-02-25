@@ -5,6 +5,7 @@ WORKDIR /FASTGA
 
 RUN apt -y update
 RUN apt -y install locales-all                  && apt-get clean  # Multilingual support
+RUN apt -y install procps                       && apt-get clean  # Needed by Nextflow
 RUN apt -y install build-essential zlib1g-dev   && apt-get clean  # Install compiler
 COPY . .
 RUN make && make install DEST_DIR=/usr/bin                        # Compile and install
